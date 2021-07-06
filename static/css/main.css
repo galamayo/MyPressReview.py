@@ -1,0 +1,99 @@
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+.nav, .pagination, .carousel, .panel-title a {
+  cursor: pointer;
+}
+accordion h4.panel-title {
+  font-size: 125%;
+  font-weight: bold;
+}
+accordion accordion h4.panel-title {
+  font-size: 100%;
+  font-weight: normal;
+}
+
+body {
+  padding-top: 50px;
+  padding-bottom: 40px;
+}
+.container .text-muted {
+  margin: 5px 0;
+}
+.navbar.navbar-fixed-bottom {
+  min-height: 30px;
+}
+
+.full-width {
+  width: 100%;
+}
+.full-height {
+  height: 100%;
+}
+.multi-lines {
+  white-space: normal !important;
+}
+
+.ng-invalid {
+  border-color: #A94442;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset;
+}
+
+.parent-vertical-align {
+  display: flex;
+  align-items: center;
+}
+.vertical-align {
+}
+
+/* Categories */
+
+.categories .panel-heading {
+  padding: 0;
+}
+.categories .panel:first-child button.up, .categories .panel:last-child button.down {
+  visibility: hidden;
+}
+.categories h4 {
+  display: inline;
+}
+
+.categories input {
+  width: 80%;
+}
+
+/* Sources */
+
+#sources h4 {
+  font-size: 150%;
+  font-weight: bold;
+}
+
+/* Add News */
+
+.progress {
+  margin-top: 1em;
+}
+
+/* Sort news */
+
+#news button.grab, #emm .import, #sort button.refresh {
+  margin-top: 20px;
+  margin-left: 10px;
+}
+#sort .info {
+  font-size: 75%;
+  font-weight: normal;
+  font-style: italic;
+}
+#sort .autocat {
+  float: right;
+  font-size: 60%;
+  font-weight: normal;
+  font-style: italic;
+}
+.fixed {
+    position: fixed;
+    right: 0;
+}

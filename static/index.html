@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!--[if lte IE 8]>     <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>PressReview</title>
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css"/>
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script type="text/javascript" src="js/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+  </head>
+  <body ng-app="MyDGNews" ng-controller="MyDGNewsCtrl as app">
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <span class="navbar-brand">My PressReview</span>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li ng-class="{active: app.curTab=='home'}"><a href="#home" ng-click="app.curTab='home'">Home</a></li>
+    <!--[if !IE]> -->
+            <li ng-class="{active: app.curTab=='news'}"><a href="#news" ng-click="app.curTab='news'">News</a></li>
+            <li ng-class="{active: app.curTab=='sort'}"><a href="#sort" ng-click="app.curTab='sort'">Sort news</a></li>
+            <li ng-class="{active: app.curTab=='gen'}"><a href="#gen" ng-click="app.curTab='gen'">Review</a></li>
+            <li ng-class="{active: app.curTab=='categories'}"><a href="#categories" ng-click="app.curTab='categories'">Categories</a></li>
+            <li ng-class="{active: app.curTab=='sources'}"><a href="#sources" ng-click="app.curTab='sources'">Sources</a></li>
+    <!-- <![endif]-->
+          </ul>
+        </div><!--/.navbar-collapse -->
+      </div>
+    </div>
+
+    <div class="container" id="main-container">
+    <!--[if IE]>
+      <div class="row">
+        <div class="col-xs-12">
+          <h1 class="page-header">Welcome to My PressReview</h1>
+          <p class="browsehappy">My DG PressReview doesn't work in Internet Explorer. Please use Firefox.</p>
+        </div>
+      </div>
+    <![endif]-->
+
+    <!--[if !IE] -->
+      <div class="row" ng-show="app.curTab=='home'" id="home">
+        <div class="col-xs-12">
+          <h1 class="page-header">Welcome to My PressReview</h1>
+          <p>I hope you will find here the tool who will help you to sort the news to generate the daily press cuttings.</p>
+        </div>
+      </div>
+
+      <div class="row" ng-show="app.curTab=='news'" id="news">
+        <div class="col-xs-12">
+          <div class="jumbotron">
+            <h1>Grab news</h1>
+            <button class="btn btn-primary btn-lg grab" type="button" ng-click="app.grabNews()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Grab more news!</button>
+            <progressbar animate="false" value="app.grabStatus" ng-hide="app.grabStatus==100"><b>{{ app.grabStatus }}%</b></progressbar>
+          </div>
+          <alert ng-repeat="alert in app.alerts_news" type="{{ alert.type }}" close="app.closeAlert(app.alerts_news, $index)"><div data-ng-bind-html="app.renderHtml(alert.msg)"></div></alert>
+        </div>
+      </div>
+
+      <div class="row" ng-show="app.curTab=='sort'" id="sort">
+        <div class="col-xs-12">
+          <div class="row">
+            <div class="col-xs-8">
+              <button class="btn btn-primary btn-lg pull-right refresh" type="button" ng-click="app.refreshNews()">Refresh news</button>
+              <h1>Sort news <span class="badge">{{ (app.news | filter:{category_title:null}).length }}</span></h1>
+            </div>
+          </div>
+          <div class="row relative" droppable drop="newsListDrop" id="allNews" ng-show="app.curTab=='sort'">
+            <div class="col-xs-8">
+              <accordion close-others="false">
+                <accordion-group ng-repeat="news in app.news | orderBy: 'date' | filter:{category_title:null}" is-open="status.open" draggable id="news{{ news.id }}">
+                  <accordion-heading>
+                    <span class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></span>
+                    <div>
+                      <!--<span class="autocat">{{ news.auto_cat }} (<span ng-style="{'color': app.getColorForPercentage(news.cat_quote), 'font-size': '5em', 'vertical-align': 'middle'}">&bull;</span> {{ news.cat_quote * 100 | number:0 }}%)</span>-->
+                      <span class="autocat">{{ news.auto_cat }} (<span ng-style="{'color': app.getColorForPercentage(news.cat_quote)}">&#11044;</span> {{ news.cat_quote * 100 | number:0 }}%)</span>
+                      <span class="info">{{ news.date | date:'dd/MM/yyyy @ HH:mm' }} ({{ news.source_title }})</span>
+                      <br/>
+                      <span ng-bind-html="app.renderHtml(news.title)"></span>
+                    </div>
+                  </accordion-heading>
+                  <p></p>
+                  <button class="btn btn-info btn-sm pull-right show" type="button" ng-click="app.showNews(news)"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> </button>
+                  <div ng-bind-html="app.renderHtml(news.abstract)"></div>
+                  <div ng-bind-html="app.renderHtml(news.text)"></div>
+                  <a ng-href="{{ news.url }}" target="_blank">Source</a>
+                </accordion-group>
+              </accordion>
+            </div>
+            <div id="categories" class="col-xs-4 fixed">
+              <accordion close-others="false">
+                <accordion-group ng-repeat="category in app.categories | orderBy:'sequence'" droppable drop="newsCategoryDrop" id="category{{ category.id }}">
+                  <accordion-heading>
+                    <span class="badge pull-right">{{ (app.news | filter:{category_title:category.title}).length }}</span>
+                    {{ category.title }}
+                  </accordion-heading>
+                  <accordion close-others="false">
+                    <accordion-group ng-repeat="news in app.news | orderBy:'-date' | filter:{category_title:category.title}" is-open="status.open" draggable id="news{{ news.id }}">
+                      <accordion-heading>
+                        <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                        <span ng-bind-html="app.renderHtml(news.title)"></span>
+                      </accordion-heading>
+                      <p>{{ news.date | date:'dd/MM/yyyy @ HH:mm' }} ({{ news.source_title }})</p>
+                      <div ng-bind-html="app.renderHtml(news.abstract)"></div>
+                      <div ng-bind-html="app.renderHtml(news.text)"></div>
+                      <a ng-href="{{ news.url }}" target="_blank">Source</a>
+                    </accordion-group>
+                  </accordion>
+                </accordion-group>
+              </accordion>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" ng-show="app.curTab=='gen'" id="gen">
+        <div class="col-xs-12">
+          <button type="button" class="btn btn-default btn-lg" ng-click="app.genReview()">Generate the Press Review</button>
+          <button type="button" class="btn btn-warning btn-lg pull-right" ng-click="app.revertReview()"><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> Cancel the last Press Review</button>
+          <button type="button" class="btn btn-danger btn-lg pull-right" ng-click="app.acceptReview()"><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> Accept the Press Review</button>
+          <h1 class="title">Press Review</h1>
+          <p class="subtitle">{{ app.review.date | date:'dd/MM/yyyy' }}</p>
+          <div ng-bind-html="app.renderHtml(app.review.html)" id="review"></div>
+        </div>
+      </div>
+
+      <div class="row" ng-show="app.curTab=='categories'" id="categories">
+        <div class="col-xs-12">
+          <h1>Categories</h1>
+          <div class="panel-group categories">
+            <div class="panel panel-default" ng-repeat="category in app.categories | filter: app.filterCategories | orderBy: 'sequence'">
+              <div class="panel-heading">
+                <button type="button" class="btn btn-default btn-lg up" aria-label="Move up" ng-click="app.upCategory(category)"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button>
+                <button type="button" class="btn btn-default btn-lg down" aria-label="Move down" ng-click="app.downCategory(category)"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
+                <h4 class="panel-title"><input class="input-lg" type="text" ng-model="category.title" ng-blur="app.updateCategory(category)" aria-label="Category title"/></h4>
+                <button type="button" class="btn btn-default btn-lg pull-right" aria-label="Delete" ng-click="app.delCategory(category)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-default btn-lg" ng-click="app.addCategory()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add a new category</button>
+        </div>
+      </div>
+
+      <div class="row" ng-show="app.curTab=='sources'" id="sources">
+        <div class="col-xs-12">
+          <h1>Sources</h1>
+          <accordion close-others="false">
+            <accordion-group ng-repeat="source in app.sources" is-open="status.open">
+              <accordion-heading>
+                <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                {{ source.title }}
+              </accordion-heading>
+              <form role="form" class="form-horizontal">
+                <div class="form-group">
+                  <label for="title{{ $index }}" class="col-sm-2 control-label">Title:</label>
+                  <div class="col-sm-10">
+                    <input id="title{{ $index }}" type="text" class="form-control" ng-model="source.title" ng-blur="app.updateSource(source)"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="url{{ $index }}" class="col-sm-2 control-label">URL:</label>
+                  <div class="col-sm-10">
+                    <input id="url{{ $index }}" type="text" class="form-control" ng-model="source.url" ng-blur="app.updateSource(source)"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="re_list{{ $index }}" class="col-sm-2 control-label">List RE:</label>
+                  <div class="col-sm-10">
+                    <textarea id="re_list{{ $index }}" class="form-control" ng-model="source.re_list" ng-blur="app.updateSource(source)"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="re_article{{ $index }}" class="col-sm-2 control-label">Article RE:</label>
+                  <div class="col-sm-10">
+                    <textarea id="re_article{{ $index }}" class="form-control" ng-model="source.re_article" ng-blur="app.updateSource(source)"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="date_format{{ $index }}" class="col-sm-2 control-label">Date format:</label>
+                  <div class="col-sm-10">
+                    <input id="date_format{{ $index }}" type="text" class="form-control" ng-model="source.date_format" ng-blur="app.updateSource(source)"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="locale{{ $index }}" class="col-sm-2 control-label">Locale:</label>
+                  <div class="col-sm-10">
+                    <input id="locale{{ $index }}" type="text" class="form-control" ng-model="source.locale" ng-blur="app.updateSource(source)"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="login_script{{ $index }}" class="col-sm-2 control-label">Login script:</label>
+                  <div class="col-sm-10">
+                    <textarea id="login_script{{ $index }}" class="form-control" ng-model="source.login_script" ng-blur="app.updateSource(source)"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="post_process{{ $index }}" class="col-sm-2 control-label">Post process:</label>
+                  <div class="col-sm-10">
+                    <textarea id="post_process{{ $index }}" class="form-control" ng-model="source.post_process" ng-blur="app.updateSource(source)"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="active{{ $index }}" class="col-sm-2 control-label">Active:</label>
+                  <div class="col-sm-10">
+                    <input id="active{{ $index }}" type="checkbox" class="form-control" ng-model="source.active" ng-true-value="'True'" ng-false-value="'False'" ng-blur="app.updateSource(source)"/>
+                  </div>
+                </div>
+              </form>
+              <button type="button" class="btn btn-default btn-lg" aria-label="Delete" ng-click="app.delSource(source)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+            </accordion-group>
+          </accordion>
+          <button type="button" class="btn btn-default btn-lg" ng-click="app.addSource()"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add a new source</button>
+        </div>
+      </div>
+    <!-- <![endif]-->
+    </div>
+
+    <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+      <div class="container">
+        <p class="text-muted">&copy; PressReview</p>
+      </div>
+    </nav>
+
+    <script type="text/javascript" src="js/jquery-1.11.1.js"></script>
+    <script type="text/javascript" src="js/angular.js"></script>
+    <script type="text/javascript" src="js/ui-bootstrap-tpls-0.12.0.js"></script>
+    <script type="text/javascript" src="js/plugins.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+  </body>
+</html>
